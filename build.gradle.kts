@@ -16,9 +16,16 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web-services")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+
+    implementation("org.springframework.boot:spring-boot-starter-web-services")
+
+    // implementation("org.apache.lucene:lucene-core:7.5.0")
+    // implementation("org.apache.lucene:lucene-analyzers-common:7.5.0")
+    // implementation("org.apache.lucene:lucene-queryparser:7.5.0")
+
+    // implementation("com.google.code.gson:gson:2.8.2")
 }
 
 tasks.withType<KotlinCompile> {
