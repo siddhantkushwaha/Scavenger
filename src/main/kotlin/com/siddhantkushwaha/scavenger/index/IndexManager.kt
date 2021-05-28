@@ -36,7 +36,6 @@ class IndexManager {
     init {
         indexDirectory = FSDirectory.open(Paths.get(indexPath))
 
-
         val indexWriterConfig = IndexWriterConfig(analyzer)
         indexWriterConfig.openMode = IndexWriterConfig.OpenMode.CREATE_OR_APPEND
 

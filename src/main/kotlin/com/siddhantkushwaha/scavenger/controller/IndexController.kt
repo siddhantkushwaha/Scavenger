@@ -21,6 +21,17 @@ class IndexController {
         return indexApp.search(query)
     }
 
+    @PostMapping("/index/write")
+    fun requestWrite(@RequestBody request: IndexRequest): IndexResponse {
+        val key = request.key ?: throw Exception("Document name cannot be null.")
+        val errorCode = indexApp.getIndexManager().processIndexRequest(request, commit = false)
+
+        return IndexResponse(
+            docKey = key,
+            statusCode = errorCode
+        )
+    }
+
     @PostMapping("/index/commit")
     fun requestCommit(): JsonObject {
         val errorCode = indexApp.getIndexManager().commit()
@@ -28,16 +39,5 @@ class IndexController {
         val response = JsonObject()
         response.addProperty("statusCode", errorCode)
         return response
-    }
-
-    @PostMapping("/index/write")
-    fun requestWrite(@RequestBody request: IndexRequest): IndexResponse {
-        val docName = request.name ?: throw Exception("Document name cannot be null.")
-        val errorCode = indexApp.getIndexManager().processIndexRequest(request, commit = false)
-
-        return IndexResponse(
-            docName = docName,
-            statusCode = errorCode
-        )
     }
 }
