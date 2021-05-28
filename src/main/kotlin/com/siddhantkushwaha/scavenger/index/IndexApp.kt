@@ -84,8 +84,8 @@ class IndexApp {
 
         val indexRequest = IndexRequest()
         indexRequest.key = key
-        indexRequest.name = title ?: key
-        indexRequest.description = description ?: key
+        indexRequest.name = title ?: ""
+        indexRequest.description = description ?: ""
         indexRequest.data = content
 
         val errorCode = indexManager.processIndexRequest(indexRequest, commit = false)
