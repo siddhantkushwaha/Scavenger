@@ -8,5 +8,5 @@ Spring Boot and Lucene based content indexing service to search and index code.
 ###### Following features being worked on as of now
 
     1. Files from disk
-    2. GitHub Repositories
-    3. GitHub Gists   
+    2. GitHub repositories
+    3. GitHub gists   
