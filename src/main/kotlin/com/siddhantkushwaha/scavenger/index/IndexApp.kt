@@ -107,22 +107,4 @@ class IndexApp {
         val attributeValue = content.substring(startIndex + attributeKey.length, endIndex)
         return attributeValue.trim()
     }
-
-    companion object {
-
-        @JvmStatic
-        fun main(args: Array<String>) {
-
-            val indexApp = IndexApp()
-
-            // index everything we have
-            // indexApp.indexDocumentsInDirectory("/Users/siddhantkushwaha/Documents/Workspace")
-
-            // test search results
-            val textQuery = "dijkstra~"
-            indexApp.search(textQuery, 20).getAsJsonArray("documents").forEach { docElement ->
-                println(docElement.asJsonObject.get("name"))
-            }
-        }
-    }
 }
