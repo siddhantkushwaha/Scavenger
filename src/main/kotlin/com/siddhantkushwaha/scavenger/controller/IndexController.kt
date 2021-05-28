@@ -19,7 +19,7 @@ class IndexController {
     fun func(@RequestBody request: IndexRequest): IndexResponse {
 
         val docName = request.name ?: throw Exception("Document name cannot be null.")
-        val errorCode = indexApp.getIndexManager().processIndexRequest(request)
+        val errorCode = indexApp.getIndexManager().processIndexRequest(request, commit = true)
 
         return IndexResponse(
             docName = docName,

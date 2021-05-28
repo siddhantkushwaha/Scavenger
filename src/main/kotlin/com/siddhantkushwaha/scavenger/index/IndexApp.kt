@@ -18,12 +18,15 @@ class IndexApp {
 
     public fun indexDocumentsInDirectory(path: String) {
         val pathObj = Paths.get(path).toRealPath()
+
         if (pathObj.isDirectory())
             Files.walk(pathObj)
                 .filter { pt -> supportedFileExtensions.contains(pt.extension) }
                 .forEach { pt -> indexDocument(pt) }
         else
             indexDocument(pathObj)
+
+        indexManager.commit()
     }
 
     private fun indexDocument(path: Path) {
@@ -38,7 +41,7 @@ class IndexApp {
         indexRequest.description = description ?: key
         indexRequest.data = content
 
-        val errorCode = indexManager.processIndexRequest(indexRequest)
+        val errorCode = indexManager.processIndexRequest(indexRequest, commit = false)
         if (errorCode > 0)
             println("Failed to index file [$key], error code [$errorCode].")
         else
@@ -69,6 +72,8 @@ class IndexApp {
         fun main(args: Array<String>) {
 
             val indexApp = IndexApp()
+
+            // index everything we have
             indexApp.indexDocumentsInDirectory("/Users/siddhantkushwaha/Documents")
         }
     }
