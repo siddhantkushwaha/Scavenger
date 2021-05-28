@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.siddhantkushwaha.scavenger.message.IndexRequest
 import org.apache.commons.text.StringEscapeUtils
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
