@@ -11,8 +11,9 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.readText
 
 class IndexApp {
-
     private val supportedFileExtensions = setOf("c", "cpp", "py", "java", "kt", "rs")
+
+    private val gson = Gson()
 
     private val indexManager = IndexManager()
 
@@ -20,27 +21,39 @@ class IndexApp {
         return indexManager
     }
 
-    public fun search(text: String): JsonObject {
+    public fun getDocument(docId: Int): JsonObject? {
+        val document = indexManager.getDoc(docId) ?: return null
+
+        val docResponse = JsonObject()
+        docResponse.addProperty("id", docId)
+        docResponse.addProperty("key", document.get("key"))
+        docResponse.addProperty("name", document.get("name"))
+        docResponse.addProperty("description", document.get("description"))
+        docResponse.addProperty("data", document.get("data"))
+
+        return docResponse
+    }
+
+    public fun search(text: String, limit: Int): JsonObject {
         val resultResponse = JsonObject()
 
-        val limit = 20
         val results = indexManager.searchDocs(text, limit)
+        val highlights = indexManager.getHighlights(text, results, 3)
 
         resultResponse.addProperty("totalHits", results.totalHits)
         val docList = ArrayList<JsonObject>()
 
         results.scoreDocs.forEach { scoreDoc ->
-            val document = indexManager.getDoc(scoreDoc.doc) ?: return@forEach
+            val document = getDocument(scoreDoc.doc) ?: return@forEach
 
-            val docResponse = JsonObject()
-            docResponse.addProperty("key", document.get("key"))
-            docResponse.addProperty("name", document.get("name"))
-            docResponse.addProperty("description", document.get("description"))
-            docResponse.addProperty("data", document.get("data"))
-            docList.add(docResponse)
+            val highlightsForDoc = highlights.get(scoreDoc.doc)
+
+            // add highlights to same doc
+            document.add("highlights", gson.toJsonTree(highlightsForDoc))
+
+            docList.add(document)
         }
 
-        val gson = Gson()
         resultResponse.add("documents", gson.toJsonTree(docList))
         return resultResponse
     }
@@ -107,7 +120,7 @@ class IndexApp {
 
             // test search results
             val textQuery = "dijkstra~"
-            indexApp.search(textQuery).getAsJsonArray("documents").forEach { docElement ->
+            indexApp.search(textQuery, 20).getAsJsonArray("documents").forEach { docElement ->
                 println(docElement.asJsonObject.get("name"))
             }
         }
