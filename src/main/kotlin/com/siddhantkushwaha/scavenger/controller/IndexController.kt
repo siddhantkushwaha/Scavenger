@@ -1,12 +1,10 @@
 package com.siddhantkushwaha.scavenger.controller
 
+import com.google.gson.JsonObject
 import com.siddhantkushwaha.scavenger.index.IndexApp
 import com.siddhantkushwaha.scavenger.message.IndexRequest
 import com.siddhantkushwaha.scavenger.message.IndexResponse
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class IndexController {
@@ -18,11 +16,24 @@ class IndexController {
         return "Server is running."
     }
 
-    @PostMapping("/index/write")
-    fun func(@RequestBody request: IndexRequest): IndexResponse {
+    @GetMapping("/search")
+    fun requestSearch(@RequestParam query: String): JsonObject {
+        return indexApp.search(query)
+    }
 
+    @PostMapping("/index/commit")
+    fun requestCommit(): JsonObject {
+        val errorCode = indexApp.getIndexManager().commit()
+
+        val response = JsonObject()
+        response.addProperty("statusCode", errorCode)
+        return response
+    }
+
+    @PostMapping("/index/write")
+    fun requestWrite(@RequestBody request: IndexRequest): IndexResponse {
         val docName = request.name ?: throw Exception("Document name cannot be null.")
-        val errorCode = indexApp.getIndexManager().processIndexRequest(request, commit = true)
+        val errorCode = indexApp.getIndexManager().processIndexRequest(request, commit = false)
 
         return IndexResponse(
             docName = docName,

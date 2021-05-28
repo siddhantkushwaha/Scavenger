@@ -103,10 +103,10 @@ class IndexApp {
             val indexApp = IndexApp()
 
             // index everything we have
-            // indexApp.indexDocumentsInDirectory("/Users/siddhantkushwaha/Documents")
+            // indexApp.indexDocumentsInDirectory("/Users/siddhantkushwaha/Documents/Workspace")
 
             // test search results
-            val textQuery = "graph"
+            val textQuery = "dijkstra~"
             indexApp.search(textQuery).getAsJsonArray("documents").forEach { docElement ->
                 println(docElement.asJsonObject.get("name"))
             }

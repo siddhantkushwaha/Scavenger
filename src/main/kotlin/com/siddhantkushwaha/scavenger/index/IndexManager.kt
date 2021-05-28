@@ -20,6 +20,7 @@ class IndexManager {
     private val indexPath = "index"
 
     private val keyKey = "key"
+    private val keyPath = "path"
     private val keyName = "name"
     private val keyDescription = "description"
     private val keyData = "data"
@@ -77,6 +78,7 @@ class IndexManager {
             val document = Document()
 
             document.add(StringField(keyKey, docKey, Field.Store.YES))
+            document.add(TextField(keyPath, docKey, Field.Store.YES))
             document.add(TextField(keyName, docName, Field.Store.YES))
             document.add(TextField(keyDescription, docDescription, Field.Store.YES))
             document.add(TextField(keyData, docData, Field.Store.YES))
@@ -95,7 +97,7 @@ class IndexManager {
         val booleanQueryBuilder = BooleanQuery.Builder()
         val sort = Sort()
 
-        val fields = arrayOf(keyKey, keyName, keyDescription, keyData)
+        val fields = arrayOf(keyPath, keyName, keyDescription, keyData)
         fields.forEach { field ->
             val qp = QueryParser(field, analyzer)
             val query = qp.parse(queryText)
