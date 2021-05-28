@@ -3,7 +3,10 @@ package com.siddhantkushwaha.scavenger.controller
 import com.siddhantkushwaha.scavenger.index.IndexApp
 import com.siddhantkushwaha.scavenger.message.IndexRequest
 import com.siddhantkushwaha.scavenger.message.IndexResponse
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class IndexController {

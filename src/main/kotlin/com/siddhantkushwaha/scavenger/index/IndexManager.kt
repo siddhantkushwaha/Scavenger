@@ -8,7 +8,8 @@ import org.apache.lucene.document.Field
 import org.apache.lucene.document.StringField
 import org.apache.lucene.document.TextField
 import org.apache.lucene.index.*
-import org.apache.lucene.search.IndexSearcher
+import org.apache.lucene.queryparser.classic.QueryParser
+import org.apache.lucene.search.*
 import org.apache.lucene.store.Directory
 import org.apache.lucene.store.FSDirectory
 import java.nio.file.Paths
@@ -25,6 +26,8 @@ class IndexManager {
 
     private val indexDirectory: Directory
 
+    private val analyzer: Analyzer = StandardAnalyzer()
+
     private val indexReader: IndexReader
     private val indexSearcher: IndexSearcher
     private val indexWriter: IndexWriter
@@ -32,7 +35,7 @@ class IndexManager {
     init {
         indexDirectory = FSDirectory.open(Paths.get(indexPath))
 
-        val analyzer: Analyzer = StandardAnalyzer()
+
         val indexWriterConfig = IndexWriterConfig(analyzer)
         indexWriterConfig.openMode = IndexWriterConfig.OpenMode.CREATE_OR_APPEND
 
@@ -48,6 +51,10 @@ class IndexManager {
 
     public fun commit(): Long {
         return indexWriter.commit()
+    }
+
+    public fun getDoc(docId: Int): Document? {
+        return indexSearcher.doc(docId)
     }
 
     public fun processIndexRequest(request: IndexRequest, commit: Boolean): Int {
@@ -76,11 +83,26 @@ class IndexManager {
 
             val documentTerm = Term(keyKey, docKey)
             indexWriter.updateDocument(documentTerm, document)
-            if (commit) indexWriter.commit()
+            if (commit) commit()
 
             return 0
         } catch (e: Exception) {
             return 1
         }
+    }
+
+    public fun searchDocs(queryText: String, limit: Int): TopFieldDocs {
+        val booleanQueryBuilder = BooleanQuery.Builder()
+        val sort = Sort()
+
+        val fields = arrayOf(keyKey, keyName, keyDescription, keyData)
+        fields.forEach { field ->
+            val qp = QueryParser(field, analyzer)
+            val query = qp.parse(queryText)
+            booleanQueryBuilder.add(query, BooleanClause.Occur.SHOULD)
+        }
+
+        val finalQuery = booleanQueryBuilder.build()
+        return indexSearcher.search(finalQuery, limit, sort)
     }
 }

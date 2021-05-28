@@ -1,7 +1,11 @@
 package com.siddhantkushwaha.scavenger.index
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.siddhantkushwaha.scavenger.message.IndexRequest
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.io.path.extension
 import kotlin.io.path.isDirectory
 import kotlin.io.path.readText
@@ -14,6 +18,31 @@ class IndexApp {
 
     public fun getIndexManager(): IndexManager {
         return indexManager
+    }
+
+    public fun search(text: String): JsonObject {
+        val resultResponse = JsonObject()
+
+        val limit = 20
+        val results = indexManager.searchDocs(text, limit)
+
+        resultResponse.addProperty("totalHits", results.totalHits)
+        val docList = ArrayList<JsonObject>()
+
+        results.scoreDocs.forEach { scoreDoc ->
+            val document = indexManager.getDoc(scoreDoc.doc) ?: return@forEach
+
+            val docResponse = JsonObject()
+            docResponse.addProperty("key", document.get("key"))
+            docResponse.addProperty("name", document.get("name"))
+            docResponse.addProperty("description", document.get("description"))
+            docResponse.addProperty("data", document.get("data"))
+            docList.add(docResponse)
+        }
+
+        val gson = Gson()
+        resultResponse.add("documents", gson.toJsonTree(docList))
+        return resultResponse
     }
 
     public fun indexDocumentsInDirectory(path: String) {
@@ -74,7 +103,13 @@ class IndexApp {
             val indexApp = IndexApp()
 
             // index everything we have
-            indexApp.indexDocumentsInDirectory("/Users/siddhantkushwaha/Documents")
+            // indexApp.indexDocumentsInDirectory("/Users/siddhantkushwaha/Documents")
+
+            // test search results
+            val textQuery = "graph"
+            indexApp.search(textQuery).getAsJsonArray("documents").forEach { docElement ->
+                println(docElement.asJsonObject.get("name"))
+            }
         }
     }
 }
