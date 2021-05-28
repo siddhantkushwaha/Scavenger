@@ -3,12 +3,15 @@ package com.siddhantkushwaha.scavenger.index
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.siddhantkushwaha.scavenger.message.IndexRequest
+import org.apache.commons.text.StringEscapeUtils
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.extension
 import kotlin.io.path.isDirectory
 import kotlin.io.path.readText
+
 
 class IndexApp {
     private val supportedFileExtensions = setOf("c", "cpp", "py", "java", "kt", "rs")
@@ -25,11 +28,13 @@ class IndexApp {
         val document = indexManager.getDoc(docId) ?: return null
 
         val docResponse = JsonObject()
+        val stringKeys = arrayOf("key", "name", "description", "data")
+
         docResponse.addProperty("id", docId)
-        docResponse.addProperty("key", document.get("key"))
-        docResponse.addProperty("name", document.get("name"))
-        docResponse.addProperty("description", document.get("description"))
-        docResponse.addProperty("data", document.get("data"))
+        stringKeys.forEach {
+            val value = StringEscapeUtils.unescapeJava(document.get(it))
+            docResponse.addProperty(it, value)
+        }
 
         return docResponse
     }
@@ -40,6 +45,7 @@ class IndexApp {
         val results = indexManager.searchDocs(text, limit)
         val highlights = indexManager.getHighlights(text, results, 3, 50)
 
+        resultResponse.addProperty("totalDocuments", indexManager.totalDocuments())
         resultResponse.addProperty("totalHits", results.totalHits)
         val docList = ArrayList<JsonObject>()
 

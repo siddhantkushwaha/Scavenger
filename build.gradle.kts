@@ -27,6 +27,8 @@ dependencies {
     implementation("org.apache.lucene:lucene-highlighter:7.5.0")
 
     implementation("com.google.code.gson:gson:2.8.2")
+
+    implementation("org.apache.commons:commons-text:1.9")
 }
 
 tasks.withType<KotlinCompile> {
