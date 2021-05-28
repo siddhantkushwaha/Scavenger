@@ -38,7 +38,7 @@ class IndexApp {
         val resultResponse = JsonObject()
 
         val results = indexManager.searchDocs(text, limit)
-        val highlights = indexManager.getHighlights(text, results, 3)
+        val highlights = indexManager.getHighlights(text, results, 3, 50)
 
         resultResponse.addProperty("totalHits", results.totalHits)
         val docList = ArrayList<JsonObject>()

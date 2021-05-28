@@ -76,7 +76,12 @@ class IndexManager {
         return indexSearcher.search(finalQuery, limit, sort)
     }
 
-    public fun getHighlights(queryText: String, results: TopFieldDocs, numFragments: Int): HashMap<Int, Array<String>> {
+    public fun getHighlights(
+        queryText: String,
+        results: TopFieldDocs,
+        numFragments: Int,
+        highlightLength: Int
+    ): HashMap<Int, Array<String>> {
         val resultMap = HashMap<Int, Array<String>>()
 
         val qp = QueryParser(keyData, analyzer)
@@ -86,7 +91,7 @@ class IndexManager {
 
         val scorer = QueryScorer(query)
         val highlighter = Highlighter(formatter, scorer)
-        val fragmenter = SimpleSpanFragmenter(scorer, 20)
+        val fragmenter = SimpleSpanFragmenter(scorer, highlightLength)
         highlighter.textFragmenter = fragmenter
 
         results.scoreDocs.forEach { scoreDoc ->
