@@ -105,6 +105,16 @@ class IndexManager {
         return resultMap
     }
 
+    public fun deleteDocument(docKey: String): Int {
+        return try {
+            val documentTerm = Term(keyKey, docKey)
+            indexWriter.deleteDocuments(documentTerm)
+            0
+        } catch (e: Exception) {
+            1
+        }
+    }
+
     public fun processIndexRequest(request: IndexRequest, commit: Boolean): Int {
         val docKey = request.key ?: return 2
         val docName = request.name ?: return 2

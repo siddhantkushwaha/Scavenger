@@ -2,8 +2,6 @@ package com.siddhantkushwaha.scavenger.controller
 
 import com.google.gson.JsonObject
 import com.siddhantkushwaha.scavenger.index.IndexApp
-import com.siddhantkushwaha.scavenger.message.IndexRequest
-import com.siddhantkushwaha.scavenger.message.IndexResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -12,11 +10,6 @@ import org.springframework.web.server.ResponseStatusException
 class IndexController {
 
     private val indexApp = IndexApp()
-
-    @GetMapping("/")
-    fun base(): String {
-        return "Server is running."
-    }
 
     @GetMapping("/search")
     fun requestSearch(
@@ -34,25 +27,5 @@ class IndexController {
         return indexApp.getDocument(docId) ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND, "Document not found."
         )
-    }
-
-    @PostMapping("/index/write")
-    fun requestWrite(@RequestBody request: IndexRequest): IndexResponse {
-        val key = request.key ?: throw Exception("Document name cannot be null.")
-        val errorCode = indexApp.getIndexManager().processIndexRequest(request, commit = false)
-
-        return IndexResponse(
-            docKey = key,
-            statusCode = errorCode
-        )
-    }
-
-    @PostMapping("/index/commit")
-    fun requestCommit(): JsonObject {
-        val errorCode = indexApp.getIndexManager().commit()
-
-        val response = JsonObject()
-        response.addProperty("statusCode", errorCode)
-        return response
     }
 }
