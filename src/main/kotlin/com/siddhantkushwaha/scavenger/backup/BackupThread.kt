@@ -17,8 +17,8 @@ class BackupThread(
                 e.printStackTrace()
             }
 
-            // sync every 6 hours
-            sleep(6 * 3600 * 1000)
+            // sync every 24 hours
+            sleep(24 * 3600 * 1000)
         }
     }
 }
