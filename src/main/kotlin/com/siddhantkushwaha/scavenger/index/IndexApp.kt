@@ -15,7 +15,9 @@ object IndexApp {
         "c", "cpp", "py", "java", "kt", "rs",   // code
         "kts", "gradle", "json", "xml",         // project configurations
         "csv", "txt", "md",                     // data
-        "ipynb"                                 // jupyter notebooks
+
+        // TODO notebook files need special handling
+        // "ipynb"
     )
 
     private val gson = Gson()
