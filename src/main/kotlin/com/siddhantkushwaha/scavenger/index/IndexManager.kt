@@ -24,12 +24,12 @@ object IndexManager {
     private const val indexPath = "index"
 
     private const val keyKey = "key"
-    private const val keyPath = "path"
-    private const val keyName = "name"
-    private const val keyDescription = "description"
-    private const val keyData = "data"
-    private const val keyExtension = "fileExtension"
-    private const val keyDataSource = "dataSource"
+    public const val keyPath = "path"
+    public const val keyName = "name"
+    public const val keyDescription = "description"
+    public const val keyData = "data"
+    public const val keyExtension = "fileExtension"
+    public const val keyDataSource = "dataSource"
 
     private val indexDirectory: Directory
 
@@ -65,15 +65,13 @@ object IndexManager {
 
     public fun searchDocs(
         queryText: String,
-        fields: Array<String>?,
+        fields: Array<String>,
         limit: Int
     ): TopFieldDocs {
         val booleanQueryBuilder = BooleanQuery.Builder()
         val sort = Sort()
 
-        // there might be other indexed attributes too, but only lookup these by default
-        val fieldsToSearchIn = fields ?: arrayOf(keyPath, keyName, keyDescription, keyData)
-        fieldsToSearchIn.forEach { field ->
+        fields.forEach { field ->
             val qp = QueryParser(field, analyzer)
             val query = qp.parse(queryText)
             booleanQueryBuilder.add(query, BooleanClause.Occur.SHOULD)

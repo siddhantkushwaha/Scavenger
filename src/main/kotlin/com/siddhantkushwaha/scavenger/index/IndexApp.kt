@@ -37,10 +37,22 @@ object IndexApp {
         return docResponse
     }
 
-    public fun search(text: String, limit: Int): JsonObject {
+    public fun search(
+        text: String,
+        limit: Int,
+        fields: Array<String>? = null
+    ): JsonObject {
         val resultResponse = JsonObject()
 
-        val results = IndexManager.searchDocs(text, fields = null, limit = limit)
+        // there might be other indexed attributes too, but only lookup these by default
+        val fieldsToSearch = fields ?: arrayOf(
+            IndexManager.keyPath,
+            IndexManager.keyName,
+            IndexManager.keyDescription,
+            IndexManager.keyData
+        )
+        
+        val results = IndexManager.searchDocs(text, fields = fieldsToSearch, limit = limit)
         val highlights = IndexManager.getHighlights(text, results, 3, 50)
 
         resultResponse.addProperty("totalDocuments", IndexManager.totalDocuments())

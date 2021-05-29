@@ -15,15 +15,20 @@ class IndexController {
     @GetMapping("/search")
     fun requestSearch(
         @RequestParam(required = true) query: String,
+        @RequestParam(required = false, name = "field") fields: Array<String>?,
         @RequestParam(required = false, defaultValue = "20") limit: Int
     ): JsonObject {
-        return IndexApp.search(query, limit)
+        var fieldsToSearch: Array<String>? = null
+        if (fields?.isNotEmpty() == true)
+            fieldsToSearch = fields
+
+        return IndexApp.search(query, limit, fieldsToSearch)
     }
 
     @ResponseBody
     @GetMapping("/get")
     fun requestGet(
-        @RequestParam(required = true) docId: Int,
+        @RequestParam(required = true) docId: Int
     ): JsonObject {
         return IndexApp.getDocument(docId) ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND, "Document not found."
