@@ -41,6 +41,10 @@ object GitHub {
     private fun indexGist(clientGistPath: Path, gistId: String, gistData: JsonObject): Int {
         val gistUrl = "https://gist.github.com/$gistId.git"
         val gistPath = Paths.get(clientGistPath.toString(), gistId)
+
+        if (IndexApp.isIndexedRecently(gistPath.toString()))
+            return 0
+
         gistPath.toFile().deleteRecursively()
 
         val retCode = cloneRepoOrGist(gistUrl, gistPath)
@@ -87,6 +91,10 @@ object GitHub {
     private fun indexRepo(clientRepoPath: Path, username: String, repoName: String, repoData: JsonObject): Int {
         val repoUrl = "https://github.com/$username/$repoName.git"
         val repoPath = Paths.get(clientRepoPath.toString(), repoName)
+
+        if (IndexApp.isIndexedRecently(repoPath.toString()))
+            return 0
+
         repoPath.toFile().deleteRecursively()
 
         val retCode = cloneRepoOrGist(repoUrl, repoPath)

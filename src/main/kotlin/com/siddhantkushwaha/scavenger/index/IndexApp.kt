@@ -6,6 +6,7 @@ import com.siddhantkushwaha.scavenger.message.IndexRequest
 import org.apache.commons.text.StringEscapeUtils
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Instant
 import kotlin.io.path.*
 
 
@@ -15,6 +16,7 @@ object IndexApp {
         "c", "cpp", "py", "java", "kt", "rs",   // code
         "kts", "gradle", "json", "xml",         // project configurations
         "csv", "txt", "md",                     // data
+        "html", "css", "js", "ts"               // web
 
         // TODO notebook files need special handling
         // "ipynb"
@@ -31,7 +33,8 @@ object IndexApp {
             IndexManager.keyName,
             IndexManager.keyDescription,
             IndexManager.keyExtension,
-            IndexManager.keyDataSource
+            IndexManager.keyDataSource,
+            IndexManager.keyModifiedTime
         )
 
         if (addContent)
@@ -48,8 +51,9 @@ object IndexApp {
 
     public fun search(
         text: String,
+        fields: Array<String>?,
         limit: Int,
-        fields: Array<String>? = null
+        escapeQuery: Boolean
     ): JsonObject {
         val resultResponse = JsonObject()
 
@@ -61,8 +65,13 @@ object IndexApp {
             IndexManager.keyData
         )
 
-        val results = IndexManager.searchDocs(text, fields = fieldsToSearch, limit = limit)
-        val highlights = IndexManager.getHighlights(text, results, 3, 50)
+        val results =
+            IndexManager.searchDocs(text, fields = fieldsToSearch, limit = limit, escapeQuery = escapeQuery)
+
+        var highlights: HashMap<Int, Array<String>>? = null
+        if (fieldsToSearch.contains(IndexManager.keyData)) {
+            highlights = IndexManager.getHighlights(text, results, 3, 30, escapeQuery)
+        }
 
         resultResponse.addProperty("totalDocuments", IndexManager.totalDocuments())
         resultResponse.addProperty("totalHits", results.totalHits)
@@ -71,12 +80,14 @@ object IndexApp {
         results.scoreDocs.forEach { scoreDoc ->
             val document = getDocument(scoreDoc.doc, addContent = false) ?: return@forEach
 
-            val highlightsForDoc = highlights[scoreDoc.doc]?.map {
-                StringEscapeUtils.unescapeJava(it)
-            }?.toTypedArray()
+            if (highlights != null) {
+                val highlightsForDoc = highlights[scoreDoc.doc]?.map {
+                    StringEscapeUtils.unescapeJava(it)
+                }?.toTypedArray()
 
-            // add highlights to same doc
-            document.add("highlights", gson.toJsonTree(highlightsForDoc))
+                // add highlights to same doc
+                document.add("highlights", gson.toJsonTree(highlightsForDoc))
+            }
 
             docList.add(document)
         }
@@ -106,6 +117,26 @@ object IndexApp {
 
             IndexManager.commit()
         }
+    }
+
+    public fun isIndexedRecently(keyPrefix: String): Boolean {
+        val res = IndexApp.search(
+            keyPrefix,
+            limit = 1,
+            fields = arrayOf(IndexManager.keyPath),
+            escapeQuery = true
+        )
+        val resultSize = res["documents"].asJsonArray.size()
+        if (resultSize > 0) {
+            val currTime = Instant.now().epochSecond
+            val lastModifiedTime = res["documents"].asJsonArray.first().asJsonObject
+                .get(IndexManager.keyModifiedTime)?.asLong ?: 0
+
+            // currently recently index if was indexed within last 6 hours
+            if (currTime - lastModifiedTime < (6 * 3600))
+                return true
+        }
+        return false
     }
 
     private fun indexDocument(

@@ -25,15 +25,13 @@ object IndexManager {
     private const val indexPath = "index"
 
     public const val keyKey = "key"
-
     public const val keyPath = "path"
     public const val keyName = "name"
     public const val keyDescription = "description"
     public const val keyData = "data"
     public const val keyExtension = "fileExtension"
     public const val keyDataSource = "dataSource"
-
-    private const val keyModifiedTime = "modifiedEpochTime"
+    public const val keyModifiedTime = "modifiedEpochTime"
 
     private val indexDirectory: Directory
 
@@ -73,14 +71,15 @@ object IndexManager {
     public fun searchDocs(
         queryText: String,
         fields: Array<String>,
-        limit: Int
+        limit: Int,
+        escapeQuery: Boolean
     ): TopFieldDocs {
         val booleanQueryBuilder = BooleanQuery.Builder()
         val sort = Sort()
 
         fields.forEach { field ->
             val qp = QueryParser(field, analyzer)
-            val query = qp.parse(queryText)
+            val query = qp.parse(if (escapeQuery) QueryParser.escape(queryText) else queryText)
             booleanQueryBuilder.add(query, BooleanClause.Occur.SHOULD)
         }
 
@@ -92,12 +91,13 @@ object IndexManager {
         queryText: String,
         results: TopFieldDocs,
         numFragments: Int,
-        highlightLength: Int
+        highlightLength: Int,
+        escapeQuery: Boolean
     ): HashMap<Int, Array<String>> {
         val resultMap = HashMap<Int, Array<String>>()
 
         val qp = QueryParser(keyData, analyzer)
-        val query = qp.parse(queryText)
+        val query = qp.parse(if (escapeQuery) QueryParser.escape(queryText) else queryText)
 
         val formatter = SimpleHTMLFormatter()
 
@@ -163,6 +163,7 @@ object IndexManager {
             document.add(StringField(keyDataSource, docSource, Field.Store.YES))
 
             document.add(LongPoint(keyModifiedTime, lastModified))
+            document.add(StoredField(keyModifiedTime, lastModified))
 
             val documentTerm = Term(keyKey, docKey)
             indexWriter.updateDocument(documentTerm, document)
