@@ -4,7 +4,10 @@ import com.siddhantkushwaha.scavenger.message.IndexRequest
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.document.*
-import org.apache.lucene.index.*
+import org.apache.lucene.index.DirectoryReader
+import org.apache.lucene.index.IndexWriter
+import org.apache.lucene.index.IndexWriterConfig
+import org.apache.lucene.index.Term
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.*
 import org.apache.lucene.search.highlight.Highlighter
@@ -36,8 +39,6 @@ object IndexManager {
 
     private val analyzer: Analyzer = StandardAnalyzer()
 
-    private val indexReader: IndexReader
-    private val indexSearcher: IndexSearcher
     private val indexWriter: IndexWriter
 
     init {
@@ -47,13 +48,18 @@ object IndexManager {
         indexWriterConfig.openMode = IndexWriterConfig.OpenMode.CREATE_OR_APPEND
 
         indexWriter = IndexWriter(indexDirectory, indexWriterConfig)
-
-        indexReader = DirectoryReader.open(indexWriter)
-        indexSearcher = IndexSearcher(indexReader)
     }
 
     public fun totalDocuments(): Int {
-        return indexReader.numDocs()
+        return getIndexReader().numDocs()
+    }
+
+    private fun getIndexReader(): DirectoryReader {
+        return DirectoryReader.open(indexWriter)
+    }
+
+    private fun getIndexSearcher(): IndexSearcher {
+        return IndexSearcher(getIndexReader())
     }
 
     public fun commit(): Long {
@@ -61,7 +67,7 @@ object IndexManager {
     }
 
     public fun getDoc(docId: Int): Document? {
-        return indexSearcher.doc(docId)
+        return getIndexSearcher().doc(docId)
     }
 
     public fun searchDocs(
@@ -79,7 +85,7 @@ object IndexManager {
         }
 
         val finalQuery = booleanQueryBuilder.build()
-        return indexSearcher.search(finalQuery, limit, sort)
+        return getIndexSearcher().search(finalQuery, limit, sort)
     }
 
     public fun getHighlights(
