@@ -8,7 +8,7 @@ class BackupThread(
         while (true) {
             try {
 
-                // sync GitHub data if username proviced
+                // sync GitHub data if username provided
                 if (gitHubUserName != null) {
                     GitHub.index(gitHubUserName)
                 }
