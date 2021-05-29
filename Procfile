@@ -1,1 +1,1 @@
-web: java -jar build/libs/scavenger-1.0.jar
+web: java -jar build/libs/scavenger-1.0.jar --server.address=0.0.0.0 --server.port=$PORT
