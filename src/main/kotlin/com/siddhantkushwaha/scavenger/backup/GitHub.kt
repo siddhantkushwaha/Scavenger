@@ -15,11 +15,11 @@ import kotlin.io.path.createDirectories
 object GitHub {
 
     // keep this same for any other agent too
-    private val pathClient = "scavenger_client"
+    private const val pathClient = "scavenger"
 
-    private val nameAgent = "github"
-    private val typeGist = "gist"
-    private val typeRepo = "repo"
+    private const val nameAgent = "github"
+    private const val typeGist = "gist"
+    private const val typeRepo = "repo"
 
     private val gson = Gson()
 
