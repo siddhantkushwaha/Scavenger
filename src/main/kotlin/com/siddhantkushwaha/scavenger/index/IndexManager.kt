@@ -21,8 +21,7 @@ object IndexManager {
 
     private const val indexPath = "index"
 
-    private const val keyKey = "key"
-    private const val keyModifiedTime = "modifiedEpochTime"
+    public const val keyKey = "key"
 
     public const val keyPath = "path"
     public const val keyName = "name"
@@ -30,6 +29,8 @@ object IndexManager {
     public const val keyData = "data"
     public const val keyExtension = "fileExtension"
     public const val keyDataSource = "dataSource"
+
+    private const val keyModifiedTime = "modifiedEpochTime"
 
     private val indexDirectory: Directory
 

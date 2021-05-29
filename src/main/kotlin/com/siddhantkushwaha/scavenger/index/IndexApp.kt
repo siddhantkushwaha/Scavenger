@@ -22,11 +22,20 @@ object IndexApp {
 
     private val gson = Gson()
 
-    public fun getDocument(docId: Int): JsonObject? {
+    public fun getDocument(docId: Int, addContent: Boolean = true): JsonObject? {
         val document = IndexManager.getDoc(docId) ?: return null
 
         val docResponse = JsonObject()
-        val stringKeys = arrayOf("key", "name", "description", "data", "fileExtension", "dataSource")
+        val stringKeys = arrayListOf(
+            IndexManager.keyKey,
+            IndexManager.keyName,
+            IndexManager.keyDescription,
+            IndexManager.keyExtension,
+            IndexManager.keyDataSource
+        )
+
+        if (addContent)
+            stringKeys.add(IndexManager.keyData)
 
         docResponse.addProperty("id", docId)
         stringKeys.forEach {
@@ -60,9 +69,9 @@ object IndexApp {
         val docList = ArrayList<JsonObject>()
 
         results.scoreDocs.forEach { scoreDoc ->
-            val document = getDocument(scoreDoc.doc) ?: return@forEach
+            val document = getDocument(scoreDoc.doc, addContent = false) ?: return@forEach
 
-            val highlightsForDoc = highlights.get(scoreDoc.doc)
+            val highlightsForDoc = highlights[scoreDoc.doc]
 
             // add highlights to same doc
             document.add("highlights", gson.toJsonTree(highlightsForDoc))
