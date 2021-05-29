@@ -80,7 +80,8 @@ object IndexManager {
         fields.forEach { field ->
             val qp = QueryParser(field, analyzer)
             val query = qp.parse(if (escapeQuery) QueryParser.escape(queryText) else queryText)
-            booleanQueryBuilder.add(query, BooleanClause.Occur.SHOULD)
+            val clause = if (fields.size > 1) BooleanClause.Occur.SHOULD else BooleanClause.Occur.MUST
+            booleanQueryBuilder.add(query, clause)
         }
 
         val finalQuery = booleanQueryBuilder.build()
