@@ -13,15 +13,15 @@ import kotlin.io.path.readText
 
 
 class IndexApp {
-    private val supportedFileExtensions = setOf("c", "cpp", "py", "java", "kt", "rs")
+    private val supportedFileExtensions = setOf(
+        "c", "cpp", "py", "java", "kt", "rs",   // code
+        "kts", "gradle", "json",                // project configurations
+        "csv", "txt"                            // data
+    )
 
     private val gson = Gson()
 
     private val indexManager = IndexManager()
-
-    public fun getIndexManager(): IndexManager {
-        return indexManager
-    }
 
     public fun getDocument(docId: Int): JsonObject? {
         val document = indexManager.getDoc(docId) ?: return null
@@ -41,7 +41,7 @@ class IndexApp {
     public fun search(text: String, limit: Int): JsonObject {
         val resultResponse = JsonObject()
 
-        val results = indexManager.searchDocs(text, limit)
+        val results = indexManager.searchDocs(text, fields = null, limit = limit)
         val highlights = indexManager.getHighlights(text, results, 3, 50)
 
         resultResponse.addProperty("totalDocuments", indexManager.totalDocuments())
@@ -65,15 +65,15 @@ class IndexApp {
 
     public fun indexDocumentsInDirectory(path: String) {
         val pathObj = Paths.get(path).toRealPath()
-
-        if (pathObj.isDirectory())
+        if (pathObj.isDirectory()) {
             Files.walk(pathObj)
-                .filter { pt -> supportedFileExtensions.contains(pt.extension) }
+                .filter { pt ->
+                    supportedFileExtensions.contains(pt.extension)
+                }
                 .forEach { pt -> indexDocument(pt) }
-        else
-            indexDocument(pathObj)
 
-        indexManager.commit()
+            indexManager.commit()
+        }
     }
 
     private fun indexDocument(path: Path) {
@@ -81,12 +81,16 @@ class IndexApp {
         val content = path.readText()
         val title = getAttribute(content, "Title")
         val description = getAttribute(content, "Description")
+        val extension = path.extension
+        val source = "disk"
 
         val indexRequest = IndexRequest()
         indexRequest.key = key
         indexRequest.name = title ?: ""
         indexRequest.description = description ?: ""
         indexRequest.data = content
+        indexRequest.fileExtension = extension
+        indexRequest.dataSource = source
 
         val errorCode = indexManager.processIndexRequest(indexRequest, commit = false)
         if (errorCode > 0)

@@ -28,6 +28,8 @@ class IndexManager {
     private val keyName = "name"
     private val keyDescription = "description"
     private val keyData = "data"
+    private val keyExtension = "fileExtension"
+    private val keyDataSource = "dataSource"
 
     private val indexDirectory: Directory
 
@@ -61,12 +63,17 @@ class IndexManager {
         return indexSearcher.doc(docId)
     }
 
-    public fun searchDocs(queryText: String, limit: Int): TopFieldDocs {
+    public fun searchDocs(
+        queryText: String,
+        fields: Array<String>?,
+        limit: Int
+    ): TopFieldDocs {
         val booleanQueryBuilder = BooleanQuery.Builder()
         val sort = Sort()
 
-        val fields = arrayOf(keyPath, keyName, keyDescription, keyData)
-        fields.forEach { field ->
+        // there might be other indexed attributes too, but only lookup these by default
+        val fieldsToSearchIn = fields ?: arrayOf(keyPath, keyName, keyDescription, keyData)
+        fieldsToSearchIn.forEach { field ->
             val qp = QueryParser(field, analyzer)
             val query = qp.parse(queryText)
             booleanQueryBuilder.add(query, BooleanClause.Occur.SHOULD)
@@ -120,8 +127,10 @@ class IndexManager {
         val docName = request.name ?: return 2
         val docDescription = request.description ?: return 2
         val docData = request.data ?: return 2
+        val docExtension = request.fileExtension ?: return 2
+        val docSource = request.dataSource ?: return 2
 
-        return indexDocument(docKey, docName, docDescription, docData, commit)
+        return indexDocument(docKey, docName, docDescription, docData, docExtension, docSource, commit)
     }
 
     private fun indexDocument(
@@ -129,16 +138,22 @@ class IndexManager {
         docName: String,
         docDescription: String,
         docData: String,
+        docExtension: String,
+        docSource: String,
         commit: Boolean
     ): Int {
         try {
             val document = Document()
 
             document.add(StringField(keyKey, docKey, Field.Store.YES))
+
             document.add(TextField(keyPath, docKey, Field.Store.YES))
             document.add(TextField(keyName, docName, Field.Store.YES))
             document.add(TextField(keyDescription, docDescription, Field.Store.YES))
             document.add(TextField(keyData, docData, Field.Store.YES))
+
+            document.add(StringField(keyData, docExtension, Field.Store.YES))
+            document.add(StringField(keyData, docSource, Field.Store.YES))
 
             val documentTerm = Term(keyKey, docKey)
             indexWriter.updateDocument(documentTerm, document)
