@@ -71,7 +71,9 @@ object IndexApp {
         results.scoreDocs.forEach { scoreDoc ->
             val document = getDocument(scoreDoc.doc, addContent = false) ?: return@forEach
 
-            val highlightsForDoc = highlights[scoreDoc.doc]
+            val highlightsForDoc = highlights[scoreDoc.doc]?.map {
+                StringEscapeUtils.unescapeJava(it)
+            }?.toTypedArray()
 
             // add highlights to same doc
             document.add("highlights", gson.toJsonTree(highlightsForDoc))
