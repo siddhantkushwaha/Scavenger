@@ -19,17 +19,17 @@ import org.apache.lucene.store.FSDirectory
 import java.nio.file.Paths
 
 
-class IndexManager {
+object IndexManager {
 
-    private val indexPath = "index"
+    private const val indexPath = "index"
 
-    private val keyKey = "key"
-    private val keyPath = "path"
-    private val keyName = "name"
-    private val keyDescription = "description"
-    private val keyData = "data"
-    private val keyExtension = "fileExtension"
-    private val keyDataSource = "dataSource"
+    private const val keyKey = "key"
+    private const val keyPath = "path"
+    private const val keyName = "name"
+    private const val keyDescription = "description"
+    private const val keyData = "data"
+    private const val keyExtension = "fileExtension"
+    private const val keyDataSource = "dataSource"
 
     private val indexDirectory: Directory
 
@@ -152,8 +152,8 @@ class IndexManager {
             document.add(TextField(keyDescription, docDescription, Field.Store.YES))
             document.add(TextField(keyData, docData, Field.Store.YES))
 
-            document.add(StringField(keyData, docExtension, Field.Store.YES))
-            document.add(StringField(keyData, docSource, Field.Store.YES))
+            document.add(StringField(keyExtension, docExtension, Field.Store.YES))
+            document.add(StringField(keyDataSource, docSource, Field.Store.YES))
 
             val documentTerm = Term(keyKey, docKey)
             indexWriter.updateDocument(documentTerm, document)

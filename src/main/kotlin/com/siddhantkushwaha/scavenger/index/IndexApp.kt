@@ -6,28 +6,27 @@ import com.siddhantkushwaha.scavenger.message.IndexRequest
 import org.apache.commons.text.StringEscapeUtils
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.io.path.extension
 import kotlin.io.path.isDirectory
+import kotlin.io.path.isHidden
 import kotlin.io.path.readText
 
 
-class IndexApp {
+object IndexApp {
+
     private val supportedFileExtensions = setOf(
         "c", "cpp", "py", "java", "kt", "rs",   // code
-        "kts", "gradle", "json",                // project configurations
+        "kts", "gradle", "json", "xml",         // project configurations
         "csv", "txt"                            // data
     )
 
     private val gson = Gson()
 
-    private val indexManager = IndexManager()
-
     public fun getDocument(docId: Int): JsonObject? {
-        val document = indexManager.getDoc(docId) ?: return null
+        val document = IndexManager.getDoc(docId) ?: return null
 
         val docResponse = JsonObject()
-        val stringKeys = arrayOf("key", "name", "description", "data")
+        val stringKeys = arrayOf("key", "name", "description", "data", "fileExtension", "dataSource")
 
         docResponse.addProperty("id", docId)
         stringKeys.forEach {
@@ -41,10 +40,10 @@ class IndexApp {
     public fun search(text: String, limit: Int): JsonObject {
         val resultResponse = JsonObject()
 
-        val results = indexManager.searchDocs(text, fields = null, limit = limit)
-        val highlights = indexManager.getHighlights(text, results, 3, 50)
+        val results = IndexManager.searchDocs(text, fields = null, limit = limit)
+        val highlights = IndexManager.getHighlights(text, results, 3, 50)
 
-        resultResponse.addProperty("totalDocuments", indexManager.totalDocuments())
+        resultResponse.addProperty("totalDocuments", IndexManager.totalDocuments())
         resultResponse.addProperty("totalHits", results.totalHits)
         val docList = ArrayList<JsonObject>()
 
@@ -63,20 +62,30 @@ class IndexApp {
         return resultResponse
     }
 
-    public fun indexDocumentsInDirectory(path: String) {
-        val pathObj = Paths.get(path).toRealPath()
-        if (pathObj.isDirectory()) {
-            Files.walk(pathObj)
+    public fun indexDocumentsInDirectory(
+        path: Path,
+        adjustRequestCallback: (IndexRequest) -> Unit
+    ) {
+        val indexedDocs = ArrayList<String>()
+        if (path.isDirectory()) {
+            Files.walk(path)
                 .filter { pt ->
-                    supportedFileExtensions.contains(pt.extension)
+                    !pt.isHidden() && supportedFileExtensions.contains(pt.extension)
                 }
-                .forEach { pt -> indexDocument(pt) }
+                .forEach { pt ->
+                    val errorCode = indexDocument(pt, adjustRequestCallback)
+                    if (errorCode == 0)
+                        indexedDocs.add(pt.toString())
+                }
 
-            indexManager.commit()
+            IndexManager.commit()
         }
     }
 
-    private fun indexDocument(path: Path) {
+    private fun indexDocument(
+        path: Path,
+        adjustRequestCallback: (IndexRequest) -> Unit
+    ): Int {
         val key = path.toString()
         val content = path.readText()
         val title = getAttribute(content, "Title")
@@ -84,6 +93,7 @@ class IndexApp {
         val extension = path.extension
         val source = "disk"
 
+        // default behavior
         val indexRequest = IndexRequest()
         indexRequest.key = key
         indexRequest.name = title ?: ""
@@ -92,11 +102,16 @@ class IndexApp {
         indexRequest.fileExtension = extension
         indexRequest.dataSource = source
 
-        val errorCode = indexManager.processIndexRequest(indexRequest, commit = false)
+        // for agent specific behavior
+        adjustRequestCallback(indexRequest)
+
+        val errorCode = IndexManager.processIndexRequest(indexRequest, commit = false)
         if (errorCode > 0)
             println("Failed to index file [$key], error code [$errorCode].")
         else
             println("Indexed file [$key]")
+
+        return errorCode
     }
 
     private fun getAttribute(content: String, attributeName: String): String? {
