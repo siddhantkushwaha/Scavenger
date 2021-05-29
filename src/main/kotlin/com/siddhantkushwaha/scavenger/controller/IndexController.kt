@@ -11,6 +11,11 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 class IndexController {
+    
+    @GetMapping("/")
+    fun home(): String {
+        return "Server is running."
+    }
 
     @GetMapping("/search")
     fun requestSearch(
