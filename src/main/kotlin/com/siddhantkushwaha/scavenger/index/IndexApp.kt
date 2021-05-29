@@ -120,12 +120,14 @@ object IndexApp {
     }
 
     public fun isIndexedRecently(keyPrefix: String): Boolean {
-        val res = IndexApp.search(
-            keyPrefix,
+        val query = keyPrefix.replace("/", " AND ")
+        val res = search(
+            query,
             limit = 1,
             fields = arrayOf(IndexManager.keyPath),
-            escapeQuery = true
+            escapeQuery = false
         )
+
         val resultSize = res["documents"].asJsonArray.size()
         if (resultSize > 0) {
             val currTime = Instant.now().epochSecond

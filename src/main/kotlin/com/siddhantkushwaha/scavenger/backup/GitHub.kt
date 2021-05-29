@@ -42,8 +42,10 @@ object GitHub {
         val gistUrl = "https://gist.github.com/$gistId.git"
         val gistPath = Paths.get(clientGistPath.toString(), gistId)
 
-        if (IndexApp.isIndexedRecently(gistPath.toString()))
+        if (IndexApp.isIndexedRecently(gistPath.toString())) {
+            println("Skipping gist [$gistId], since already indexed.")
             return 0
+        }
 
         gistPath.toFile().deleteRecursively()
 
@@ -92,8 +94,10 @@ object GitHub {
         val repoUrl = "https://github.com/$username/$repoName.git"
         val repoPath = Paths.get(clientRepoPath.toString(), repoName)
 
-        if (IndexApp.isIndexedRecently(repoPath.toString()))
+        if (IndexApp.isIndexedRecently(repoPath.toString())) {
+            println("Skipping repo [$username/$repoName], since already indexed.")
             return 0
+        }
 
         repoPath.toFile().deleteRecursively()
 
