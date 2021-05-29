@@ -2,6 +2,7 @@ package com.siddhantkushwaha.scavenger.backup
 
 import com.google.gson.Gson
 import com.google.gson.JsonArray
+import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.siddhantkushwaha.scavenger.index.IndexApp
 import java.net.URL
@@ -46,11 +47,15 @@ object GitHub {
         if (retCode > 0)
             return retCode
 
+        var gistDescription = ""
+        val descriptionJsonElement = gistData["description"]
+        if (descriptionJsonElement != null && descriptionJsonElement != JsonNull.INSTANCE)
+            gistDescription = descriptionJsonElement.asString
+
         IndexApp.indexDocumentsInDirectory(gistPath) { indexRequest ->
             indexRequest.dataSource = "${nameAgent}_${typeGist}"
 
             // overwrite with gist's description
-            val gistDescription = gistData.get("description")?.asString ?: ""
             if (gistDescription.isNotEmpty())
                 indexRequest.description = gistDescription
         }
@@ -88,13 +93,17 @@ object GitHub {
         if (retCode > 0)
             return retCode
 
+        var repoDescription = ""
+        val descriptionJsonElement = repoData["description"]
+        if (descriptionJsonElement != null && descriptionJsonElement != JsonNull.INSTANCE)
+            repoDescription = descriptionJsonElement.asString
+
         IndexApp.indexDocumentsInDirectory(repoPath) { indexRequest ->
             indexRequest.dataSource = "${nameAgent}_${typeGist}"
 
             // overwrite with repo's description
-            val gistDescription = repoData.get("description")?.asString ?: ""
-            if (gistDescription.isNotEmpty())
-                indexRequest.description = gistDescription
+            if (repoDescription.isNotEmpty())
+                indexRequest.description = repoDescription
         }
 
         repoPath.toFile().deleteRecursively()
@@ -107,7 +116,6 @@ object GitHub {
 
         val repoDataAll = getRepos(username)
         for (repoData in repoDataAll) {
-            print(repoData.key)
             indexRepo(clientRepoPath, username, repoData.key, repoData.value)
         }
     }
@@ -127,8 +135,4 @@ object GitHub {
         }
         return retCode
     }
-}
-
-fun main() {
-    GitHub.index("siddhantkushwaha")
 }
