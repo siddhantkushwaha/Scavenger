@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 class IndexController {
-    
+
     @GetMapping("/")
     fun home(): String {
         return "Server is running."
@@ -21,13 +21,14 @@ class IndexController {
     fun requestSearch(
         @RequestParam(required = true) query: String,
         @RequestParam(required = false, name = "field") fields: Array<String>?,
-        @RequestParam(required = false, defaultValue = "20") limit: Int
+        @RequestParam(required = false, defaultValue = "20") limit: Int,
+        @RequestParam(required = false, defaultValue = "true") regex: Boolean
     ): JsonObject {
         var fieldsToSearch: Array<String>? = null
         if (fields?.isNotEmpty() == true)
             fieldsToSearch = fields
 
-        return IndexApp.search(query, limit, fieldsToSearch)
+        return IndexApp.search(query, fields = fieldsToSearch, limit = limit, escapeQuery = !regex)
     }
 
     @ResponseBody
