@@ -6,10 +6,7 @@ import com.siddhantkushwaha.scavenger.message.IndexRequest
 import org.apache.commons.text.StringEscapeUtils
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isHidden
-import kotlin.io.path.readText
+import kotlin.io.path.*
 
 
 object IndexApp {
@@ -17,7 +14,8 @@ object IndexApp {
     private val supportedFileExtensions = setOf(
         "c", "cpp", "py", "java", "kt", "rs",   // code
         "kts", "gradle", "json", "xml",         // project configurations
-        "csv", "txt"                            // data
+        "csv", "txt", "md",                     // data
+        "ipynb"                                 // jupyter notebooks
     )
 
     private val gson = Gson()
@@ -51,7 +49,7 @@ object IndexApp {
             IndexManager.keyDescription,
             IndexManager.keyData
         )
-        
+
         val results = IndexManager.searchDocs(text, fields = fieldsToSearch, limit = limit)
         val highlights = IndexManager.getHighlights(text, results, 3, 50)
 
@@ -82,7 +80,10 @@ object IndexApp {
         if (path.isDirectory()) {
             Files.walk(path)
                 .filter { pt ->
-                    !pt.isHidden() && supportedFileExtensions.contains(pt.extension)
+                    var qualify = !pt.isHidden()
+                    qualify = qualify && supportedFileExtensions.contains(pt.extension)
+                    qualify = qualify && pt.fileSize() <= (2 * 1024 * 1024) // don't index any file bigger than 2 MB
+                    qualify
                 }
                 .forEach { pt ->
                     val errorCode = indexDocument(pt, adjustRequestCallback)

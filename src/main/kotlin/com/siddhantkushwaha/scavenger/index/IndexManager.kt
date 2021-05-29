@@ -3,10 +3,7 @@ package com.siddhantkushwaha.scavenger.index
 import com.siddhantkushwaha.scavenger.message.IndexRequest
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.standard.StandardAnalyzer
-import org.apache.lucene.document.Document
-import org.apache.lucene.document.Field
-import org.apache.lucene.document.StringField
-import org.apache.lucene.document.TextField
+import org.apache.lucene.document.*
 import org.apache.lucene.index.*
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.*
@@ -17,6 +14,7 @@ import org.apache.lucene.search.highlight.SimpleSpanFragmenter
 import org.apache.lucene.store.Directory
 import org.apache.lucene.store.FSDirectory
 import java.nio.file.Paths
+import java.time.Instant
 
 
 object IndexManager {
@@ -24,6 +22,8 @@ object IndexManager {
     private const val indexPath = "index"
 
     private const val keyKey = "key"
+    private const val keyModifiedTime = "modifiedEpochTime"
+
     public const val keyPath = "path"
     public const val keyName = "name"
     public const val keyDescription = "description"
@@ -141,6 +141,8 @@ object IndexManager {
         commit: Boolean
     ): Int {
         try {
+            val lastModified = Instant.now().epochSecond
+
             val document = Document()
 
             document.add(StringField(keyKey, docKey, Field.Store.YES))
@@ -152,6 +154,8 @@ object IndexManager {
 
             document.add(StringField(keyExtension, docExtension, Field.Store.YES))
             document.add(StringField(keyDataSource, docSource, Field.Store.YES))
+
+            document.add(LongPoint(keyModifiedTime, lastModified))
 
             val documentTerm = Term(keyKey, docKey)
             indexWriter.updateDocument(documentTerm, document)
