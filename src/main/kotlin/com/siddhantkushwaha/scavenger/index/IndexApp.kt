@@ -125,7 +125,7 @@ object IndexApp {
             query,
             limit = 1,
             fields = arrayOf(IndexManager.keyPath),
-            escapeQuery = false
+            escapeQuery = true
         )
 
         val resultSize = res["documents"].asJsonArray.size()
