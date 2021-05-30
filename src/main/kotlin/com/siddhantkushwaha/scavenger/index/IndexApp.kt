@@ -120,7 +120,7 @@ object IndexApp {
     }
 
     public fun isIndexedRecently(keyPrefix: String): Boolean {
-        val query = keyPrefix.replace("/", " AND ")
+        val query = keyPrefix.replace(IndexManager.specialCharactersRegex, " AND ")
         val res = search(
             query,
             limit = 1,
@@ -134,8 +134,8 @@ object IndexApp {
             val lastModifiedTime = res["documents"].asJsonArray.first().asJsonObject
                 .get(IndexManager.keyModifiedTime)?.asLong ?: 0
 
-            // currently recently index if was indexed within last 6 hours
-            if (currTime - lastModifiedTime < (6 * 3600))
+            // currently recently indexed if was indexed within last 24 hours
+            if (currTime - lastModifiedTime < (24 * 3600))
                 return true
         }
         return false
