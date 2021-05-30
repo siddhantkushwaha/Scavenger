@@ -33,6 +33,8 @@ object IndexManager {
     public const val keyDataSource = "dataSource"
     public const val keyModifiedTime = "modifiedEpochTime"
 
+    public val specialCharactersRegex = Regex("[\\\\+\\-!():^\\[\\]\"{}~*?|&/]")
+
     private val indexDirectory: Directory
 
     private val analyzer: Analyzer = StandardAnalyzer()
@@ -85,6 +87,9 @@ object IndexManager {
         }
 
         val finalQuery = booleanQueryBuilder.build()
+
+        println(finalQuery)
+
         return getIndexSearcher().search(finalQuery, limit, sort)
     }
 
