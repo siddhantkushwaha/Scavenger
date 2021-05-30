@@ -87,9 +87,6 @@ object IndexManager {
         }
 
         val finalQuery = booleanQueryBuilder.build()
-
-        println(finalQuery)
-
         return getIndexSearcher().search(finalQuery, limit, sort)
     }
 
