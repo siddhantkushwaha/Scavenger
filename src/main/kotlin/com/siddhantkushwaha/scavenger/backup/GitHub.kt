@@ -111,7 +111,7 @@ object GitHub {
             repoDescription = descriptionJsonElement.asString
 
         IndexApp.indexDocumentsInDirectory(repoPath) { indexRequest ->
-            indexRequest.dataSource = "${nameAgent}_${typeGist}"
+            indexRequest.dataSource = "${nameAgent}_${typeRepo}"
 
             // overwrite with repo's description
             if (repoDescription.isNotEmpty())
