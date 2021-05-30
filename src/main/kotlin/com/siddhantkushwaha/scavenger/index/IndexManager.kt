@@ -87,7 +87,7 @@ object IndexManager {
         }
 
         val finalQuery = booleanQueryBuilder.build()
-        return getIndexSearcher().search(finalQuery, limit, sort)
+        return getIndexSearcher().search(finalQuery, limit, sort, true, true)
     }
 
     public fun getHighlights(

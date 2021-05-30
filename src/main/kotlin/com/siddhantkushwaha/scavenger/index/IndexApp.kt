@@ -41,6 +41,7 @@ object IndexApp {
             stringKeys.add(IndexManager.keyData)
 
         docResponse.addProperty("id", docId)
+
         stringKeys.forEach {
             val value = StringEscapeUtils.unescapeJava(document.get(it))
             docResponse.addProperty(it, value)
@@ -88,6 +89,7 @@ object IndexApp {
                 // add highlights to same doc
                 document.add("highlights", gson.toJsonTree(highlightsForDoc))
             }
+            document.addProperty("score", scoreDoc.score)
 
             docList.add(document)
         }
