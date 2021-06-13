@@ -71,7 +71,7 @@ object IndexApp {
 
         var highlights: HashMap<Int, Array<String>>? = null
         if (fieldsToSearch.contains(IndexManager.keyData)) {
-            highlights = IndexManager.getHighlights(text, results, 3, 30, escapeQuery)
+            highlights = IndexManager.getHighlights(text, results, 1, 100, escapeQuery)
         }
 
         resultResponse.addProperty("totalDocuments", IndexManager.totalDocuments())
