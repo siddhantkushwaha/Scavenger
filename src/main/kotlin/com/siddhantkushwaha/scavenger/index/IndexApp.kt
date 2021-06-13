@@ -14,9 +14,9 @@ object IndexApp {
 
     private val supportedFileExtensions = setOf(
         "c", "cpp", "py", "java", "kt", "rs",   // code
-        "kts", "gradle", "json", "xml",         // project configurations
-        "csv", "txt", "md",                     // data
-        "html", "css", "js", "ts"               // web
+        "kts", "gradle", "json",                // project configurations
+        "txt",                                  // data
+        "css", "js", "ts"                       // web, can't have HTML, XMl for front-end rendering reasons
 
         // TODO notebook files need special handling
         // "ipynb"
