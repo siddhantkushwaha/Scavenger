@@ -16,7 +16,8 @@ object IndexApp {
         "c", "cpp", "py", "java", "kt", "rs",   // code
         "kts", "gradle", "json",                // project configurations
         "txt",                                  // data
-        "css", "js", "ts"                       // web, can't have HTML, XMl for front-end rendering reasons
+        "css", "js", "ts",                      // web, can't have HTML, XMl for front-end rendering reasons
+        "bat", "sh"                             // cl
 
         // TODO notebook files need special handling
         // "ipynb"
