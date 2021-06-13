@@ -162,8 +162,8 @@ object IndexManager {
             document.add(TextField(keyDescription, docDescription, Field.Store.YES))
             document.add(TextField(keyData, docData, Field.Store.YES))
 
-            document.add(StringField(keyExtension, docExtension, Field.Store.YES))
-            document.add(StringField(keyDataSource, docSource, Field.Store.YES))
+            document.add(TextField(keyExtension, docExtension, Field.Store.YES))
+            document.add(TextField(keyDataSource, docSource, Field.Store.YES))
 
             document.add(LongPoint(keyModifiedTime, lastModified))
             document.add(StoredField(keyModifiedTime, lastModified))
