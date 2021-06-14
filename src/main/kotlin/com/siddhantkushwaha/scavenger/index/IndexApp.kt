@@ -14,8 +14,7 @@ object IndexApp {
 
     private val supportedFileExtensions = setOf(
         "c", "cpp", "py", "java", "kt", "rs",   // code
-        "kts", "gradle", "json",                // project configurations
-        "txt",                                  // data
+        "kts", "gradle",                        // project configurations
         "css", "js", "ts",                      // web, can't have HTML, XMl for front-end rendering reasons
         "bat", "sh"                             // cl
 
