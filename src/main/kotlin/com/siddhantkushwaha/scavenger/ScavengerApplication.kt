@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
     runApplication<ScavengerApplication>(*args)
 
     // this is configured to run every 6 hours
-    runSyncThread()
+    // runSyncThread()
 }
 
 fun runSyncThread() {

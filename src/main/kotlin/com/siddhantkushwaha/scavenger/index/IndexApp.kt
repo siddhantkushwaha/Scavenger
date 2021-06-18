@@ -3,7 +3,6 @@ package com.siddhantkushwaha.scavenger.index
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.siddhantkushwaha.scavenger.message.IndexRequest
-import org.apache.commons.text.StringEscapeUtils
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Instant
@@ -43,7 +42,7 @@ object IndexApp {
         docResponse.addProperty("id", docId)
 
         stringKeys.forEach {
-            val value = StringEscapeUtils.unescapeJava(document.get(it))
+            val value = document.get(it)
             docResponse.addProperty(it, value)
         }
 
@@ -82,9 +81,7 @@ object IndexApp {
             val document = getDocument(scoreDoc.doc, addContent = false) ?: return@forEach
 
             if (highlights != null) {
-                val highlightsForDoc = highlights[scoreDoc.doc]?.map {
-                    StringEscapeUtils.unescapeJava(it)
-                }?.toTypedArray()
+                val highlightsForDoc = highlights[scoreDoc.doc]
 
                 // add highlights to same doc
                 document.add("highlights", gson.toJsonTree(highlightsForDoc))
