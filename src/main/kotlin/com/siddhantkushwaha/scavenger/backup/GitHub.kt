@@ -29,13 +29,28 @@ object GitHub {
     }
 
     private fun getGists(username: String): Map<String, JsonObject> {
-        val content = URL("https://api.github.com/users/$username/gists").readText()
-        val jsonContent = gson.fromJson(content, JsonArray::class.java)
-        return jsonContent.associate { je ->
-            val jo = je.asJsonObject
-            val gistId = jo.get("id").asString
-            gistId to jo
+        val resultMap = HashMap<String, JsonObject>()
+
+        var page = 1
+
+        var numItemsLastPage = 0
+        val maxItemsPerPage = 100
+
+        while (page == 1 || numItemsLastPage == maxItemsPerPage) {
+            val content = URL("https://api.github.com/users/$username/gists?page=$page&per_page=$maxItemsPerPage")
+                .readText()
+            val jsonContent = gson.fromJson(content, JsonArray::class.java)
+            val pageMap = jsonContent.associate { je ->
+                val jo = je.asJsonObject
+                val gistId = jo.get("id").asString
+                gistId to jo
+            }
+            resultMap.putAll(pageMap)
+
+            numItemsLastPage = pageMap.size
+            page += 1
         }
+        return resultMap
     }
 
     private fun indexGist(clientGistPath: Path, gistId: String, gistData: JsonObject): Int {
@@ -81,13 +96,28 @@ object GitHub {
     }
 
     private fun getRepos(username: String): Map<String, JsonObject> {
-        val content = URL("https://api.github.com/users/$username/repos").readText()
-        val jsonContent = gson.fromJson(content, JsonArray::class.java)
-        return jsonContent.associate { je ->
-            val jo = je.asJsonObject
-            val repoName = jo.get("name").asString
-            repoName to jo
+        val resultMap = HashMap<String, JsonObject>()
+
+        var page = 1
+
+        var numItemsLastPage = 0
+        val maxItemsPerPage = 100
+
+        while (page == 1 || numItemsLastPage == maxItemsPerPage) {
+            val content = URL("https://api.github.com/users/$username/repos?page=$page&per_page=$maxItemsPerPage")
+                .readText()
+            val jsonContent = gson.fromJson(content, JsonArray::class.java)
+            val pageMap = jsonContent.associate { je ->
+                val jo = je.asJsonObject
+                val repoName = jo.get("name").asString
+                repoName to jo
+            }
+            resultMap.putAll(pageMap)
+
+            numItemsLastPage = pageMap.size
+            page += 1
         }
+        return resultMap
     }
 
     private fun indexRepo(clientRepoPath: Path, username: String, repoName: String, repoData: JsonObject): Int {

@@ -14,11 +14,8 @@ object IndexApp {
     private val supportedFileExtensions = setOf(
         "c", "cpp", "py", "java", "kt", "rs",   // code
         "kts", "gradle",                        // project configurations
-        "css", "js", "ts",                      // web, can't have HTML, XMl for front-end rendering reasons
-        "bat", "sh"                             // cl
-
-        // TODO notebook files need special handling
-        // "ipynb"
+        "css", "js", "ts", "html",              // web
+        "bat", "sh"                             // shell
     )
 
     private val gson = Gson()
